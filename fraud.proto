@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package fraud;
+
+message TransactionRequest {
+  string transaction_id = 1;
+  string account_id = 2;
+  double amount = 3;
+  string merchant = 4;
+  string timestamp = 5;
+}
+
+message TransactionResponse {
+  double risk_score = 1;
+  string decision = 2;       // "APPROVE", "REVIEW", or "DECLINE"
+  repeated string reason_codes = 3;
+}
+
+message FlagAccountRequest {
+  string account_id = 1;
+  string reason = 2;
+  string flagged_by = 3;
+}
+
+message FlagAccountResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message RiskProfileRequest {
+  string account_id = 1;
+}
+
+message RiskProfileResponse {
+  string risk_level = 1;
+  repeated string recent_flags = 2;
+  string last_reviewed_date = 3;
+}
+
+service FraudDetectionService {
+  rpc CheckTransaction (TransactionRequest) returns (TransactionResponse);
+  rpc FlagAccount (FlagAccountRequest) returns (FlagAccountResponse);
+  rpc GetAccountRiskProfile (RiskProfileRequest) returns (RiskProfileResponse);
+}
