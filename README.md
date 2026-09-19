@@ -51,3 +51,15 @@ Expected: 3 successful responses (APPROVE decision, flag confirmation, risk prof
 - Aranya Wijayasekara — gRPC server
 - Nikeshala Dewindi — SOAP client
 - Both — Gateway
+
+  ## Setup & Run — SOAP Client (Nikeshala Dewindi)
+1. Navigate to the client folder:
+   cd soap-client
+
+2. Install dependencies:
+   pip install -r requirements.txt
+
+3. Ensure the Translating Gateway is running at http://localhost:8000/soap.
+
+4. Run the SOAP client test suite:
+   python soap_client.py
