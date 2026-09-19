@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="FraudDetectionService"
+             targetNamespace="http://ds-assignment.example.com/fraud"
+             xmlns:tns="http://ds-assignment.example.com/fraud"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+  <!-- ============ TYPES ============ -->
+  <types>
+    <xsd:schema targetNamespace="http://ds-assignment.example.com/fraud"
+                xmlns:tns="http://ds-assignment.example.com/fraud"
+                elementFormDefault="qualified">
+
+      <!-- === CheckTransaction = -->
+      <xsd:element name="CheckTransactionRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="transactionId" type="xsd:string"/>
+            <xsd:element name="accountId" type="xsd:string"/>
+            <xsd:element name="amount" type="xsd:double"/>
+            <xsd:element name="currency" type="xsd:string"/>
+            <xsd:element name="merchantName" type="xsd:string"/>
+            <xsd:element name="timestamp" type="xsd:dateTime"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="CheckTransactionResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="transactionId" type="xsd:string"/>
+            <xsd:element name="decision" type="xsd:string"/> <!-- APPROVE | REVIEW | DECLINE -->
+            <xsd:element name="riskScore" type="xsd:double"/>
+            <xsd:element name="reason" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- === FlagAccount = -->
+      <xsd:element name="FlagAccountRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="accountId" type="xsd:string"/>
+            <xsd:element name="reason" type="xsd:string"/>
+            <xsd:element name="flaggedBy" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="FlagAccountResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="success" type="xsd:boolean"/>
+            <xsd:element name="message" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- === GetAccountRiskProfile = -->
+      <xsd:element name="GetAccountRiskProfileRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="accountId" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="GetAccountRiskProfileResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="accountId" type="xsd:string"/>
+            <xsd:element name="riskLevel" type="xsd:string"/> <!-- LOW | MEDIUM | HIGH -->
+            <xsd:element name="riskScore" type="xsd:double"/>
+            <xsd:element name="flagCount" type="xsd:int"/>
+            <xsd:element name="lastUpdated" type="xsd:dateTime"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- === Fault detail (carries the mapped gRPC status code back to the client) = -->
+      <xsd:element name="FraudServiceFaultDetail">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="grpcStatusCode" type="xsd:string"/>
+            <xsd:element name="grpcStatusMessage" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+    </xsd:schema>
+  </types>
+
+  <!-- ============ MESSAGES ============ -->
+  <message name="CheckTransactionRequestMsg">
+    <part name="parameters" element="tns:CheckTransactionRequest"/>
+  </message>
+  <message name="CheckTransactionResponseMsg">
+    <part name="parameters" element="tns:CheckTransactionResponse"/>
+  </message>
+
+  <message name="FlagAccountRequestMsg">
+    <part name="parameters" element="tns:FlagAccountRequest"/>
+  </message>
+  <message name="FlagAccountResponseMsg">
+    <part name="parameters" element="tns:FlagAccountResponse"/>
+  </message>
+
+  <message name="GetAccountRiskProfileRequestMsg">
+    <part name="parameters" element="tns:GetAccountRiskProfileRequest"/>
+  </message>
+  <message name="GetAccountRiskProfileResponseMsg">
+    <part name="parameters" element="tns:GetAccountRiskProfileResponse"/>
+  </message>
+
+  <message name="FraudServiceFaultMsg">
+    <part name="fault" element="tns:FraudServiceFaultDetail"/>
+  </message>
+
+  <!-- ============ PORT TYPE ============ -->
+  <portType name="FraudDetectionPortType">
+    <operation name="CheckTransaction">
+      <input message="tns:CheckTransactionRequestMsg"/>
+      <output message="tns:CheckTransactionResponseMsg"/>
+      <fault name="FraudServiceFault" message="tns:FraudServiceFaultMsg"/>
+    </operation>
+    <operation name="FlagAccount">
+      <input message="tns:FlagAccountRequestMsg"/>
+      <output message="tns:FlagAccountResponseMsg"/>
+      <fault name="FraudServiceFault" message="tns:FraudServiceFaultMsg"/>
+    </operation>
+    <operation name="GetAccountRiskProfile">
+      <input message="tns:GetAccountRiskProfileRequestMsg"/>
+      <output message="tns:GetAccountRiskProfileResponseMsg"/>
+      <fault name="FraudServiceFault" message="tns:FraudServiceFaultMsg"/>
+    </operation>
+  </portType>
+
+  <!-- ============ BINDING (document/literal) ============ -->
+  <binding name="FraudDetectionBinding" type="tns:FraudDetectionPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+    <operation name="CheckTransaction">
+      <soap:operation soapAction="http://ds-assignment.example.com/fraud/CheckTransaction"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+      <fault name="FraudServiceFault"><soap:fault name="FraudServiceFault" use="literal"/></fault>
+    </operation>
+
+    <operation name="FlagAccount">
+      <soap:operation soapAction="http://ds-assignment.example.com/fraud/FlagAccount"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+      <fault name="FraudServiceFault"><soap:fault name="FraudServiceFault" use="literal"/></fault>
+    </operation>
+
+    <operation name="GetAccountRiskProfile">
+      <soap:operation soapAction="http://ds-assignment.example.com/fraud/GetAccountRiskProfile"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+      <fault name="FraudServiceFault"><soap:fault name="FraudServiceFault" use="literal"/></fault>
+    </operation>
+  </binding>
+
+  <!-- ============ SERVICE ============ -->
+  <service name="FraudDetectionService">
+    <port name="FraudDetectionPort" binding="tns:FraudDetectionBinding">
+      <soap:address location="http://localhost:8000/soap"/>
+    </port>
+  </service>
+
+</definitions>
