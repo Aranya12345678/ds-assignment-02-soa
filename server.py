@@ -4,6 +4,10 @@ import grpc
 import fraud_pb2
 import fraud_pb2_grpc
 
+# Simulated "known accounts" — in a real system this would be a database lookup
+KNOWN_ACCOUNTS = {"acc123", "acc-2001", "acc-2002"}
+
+
 class FraudDetectionServicer(fraud_pb2_grpc.FraudDetectionServiceServicer):
 
     def CheckTransaction(self, request, context):
@@ -55,8 +59,8 @@ class FraudDetectionServicer(fraud_pb2_grpc.FraudDetectionServiceServicer):
             context.set_details("account_id is required")
             return fraud_pb2.RiskProfileResponse()
 
-        # Placeholder
-        if request.account_id == "unknown":
+        # Simulate a real account lookup — unknown accounts return NOT_FOUND
+        if request.account_id not in KNOWN_ACCOUNTS:
             context.set_code(grpc.StatusCode.NOT_FOUND)
             context.set_details(f"Account {request.account_id} not found")
             return fraud_pb2.RiskProfileResponse()
